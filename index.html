@@ -3,21 +3,984 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My personal web</title>
-    <link rel = "stylesheet" href="style.css">
+    <title>个人时间追踪系统 - 自我管理工具</title>
+    <style>
+        :root {
+            --primary: #0078d7;
+            --primary-dark: #005a9e;
+            --success: #107c10;
+            --danger: #d13438;
+            --warning: #ffb900;
+            --bg-light: #f5f5f5;
+            --bg-white: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border: #d0d0d0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --radius: 6px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+        }
+
+        header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            margin: 0 0 1.5rem 0;
+            font-size: 1.3rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timer-display {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .timer-text {
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: var(--primary);
+            margin: 1rem 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer-project-name {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(0, 120, 215, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #0a6d0a;
+            box-shadow: 0 4px 12px rgba(16, 124, 16, 0.4);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #a81a1f;
+            box-shadow: 0 4px 12px rgba(209, 52, 56, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #ebebeb;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-box {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: var(--radius);
+            text-align: center;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        thead {
+            background: var(--bg-light);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary), #0099ff);
+            height: 20px;
+            border-radius: 3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 6px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            min-width: 30px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-running {
+            background: #c7e9c0;
+            color: var(--success);
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-paused {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 4px;
+            background: var(--bg-light);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-icon:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-icon.delete:hover {
+            background: var(--danger);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timer-text {
+                font-size: 2.5rem;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            th, td {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Hello, I'm Usami05, this is my personal web</h1>
-        <p>welcome</p>
-    </header>
-    <main>
-        <h2>What shall I do</h2>
-        <p>Find something to kill time</p>
-    </main>
-    <footer>
-        <p>2025 Usami05</p>
-    </footer>
-    <script src="script.js">    </script>
+    <div class="container">
+        <header>
+            <h1>⏱️ 个人时间追踪系统</h1>
+            <p>专注于你的工作，让我们帮你记录每一分每一秒</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- 左侧：实时计时器 -->
+            <div class="card">
+                <h2>⏰ 计时器</h2>
+                <div id="currentProject" class="timer-project-name" style="display: none;"></div>
+                <div class="timer-display">
+                    <div class="timer-text" id="timerDisplay">00:00:00</div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="startBtn" onclick="startProject()">开始</button>
+                    <button class="btn btn-success" id="pauseBtn" onclick="pauseProject()" style="display: none;">暂停</button>
+                    <button class="btn btn-success" id="resumeBtn" onclick="resumeProject()" style="display: none;">继续</button>
+                    <button class="btn btn-danger" id="stopBtn" onclick="stopProject()" style="display: none;">结束</button>
+                    <button class="btn btn-secondary" onclick="resetTimer()">重置</button>
+                </div>
+            </div>
+
+            <!-- 右侧：项目选择和统计 -->
+            <div class="card">
+                <h2>📊 项目统计</h2>
+                <div class="input-group">
+                    <input type="text" id="newProjectName" placeholder="输入项目名称..." />
+                    <button class="btn btn-primary btn-sm" onclick="selectProject()">选择/新建</button>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">总项目数</div>
+                        <div class="stat-value" id="totalProjects">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">今日记录</div>
+                        <div class="stat-value" id="todayRecords">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">总投入时间</div>
+                        <div class="stat-value" id="totalTime">0h</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">平均时长</div>
+                        <div class="stat-value" id="avgTime">0h</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据表格和导出 -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0;">📈 时间记录</h2>
+                <div class="button-group">
+                    <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📥 导出 CSV</button>
+                    <button class="btn btn-secondary btn-sm" onclick="exportJSON()">📥 导出 JSON</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('all')">所有记录</button>
+                <button class="tab" onclick="switchTab('today')">今日</button>
+                <button class="tab" onclick="switchTab('week')">本周</button>
+            </div>
+
+            <div id="all" class="tab-content active">
+                <div class="table-wrapper">
+                    <table id="allTable">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>项目名称</th>
+                                <th>开始时间</th>
+                                <th>时长</th>
+                                <th>占比</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allBody"></tbody>
+                    </table>
+                </div>
+                <div id="emptyAll" class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>还没有任何时间记录，快开始你的第一个项目吧！</p>
+                </div>
+            </div>
+
+            <div id="today" class="tab-content">
+                <div class="table-wrapper">
+                    <table id="todayTable">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>项目名称</th>
+                                <th>开始时间</th>
+                                <th>时长</th>
+                                <th>占比</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todayBody"></tbody>
+                    </table>
+                </div>
+                <div id="emptyToday" class="empty-state">
+                    <div class="empty-state-icon">🌅</div>
+                    <p>今天还没有任何记录</p>
+                </div>
+            </div>
+
+            <div id="week" class="tab-content">
+                <div class="table-wrapper">
+                    <table id="weekTable">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>项目名称</th>
+                                <th>日期</th>
+                                <th>时长</th>
+                                <th>占比</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weekBody"></tbody>
+                    </table>
+                </div>
+                <div id="emptyWeek" class="empty-state">
+                    <div class="empty-state-icon">📆</div>
+                    <p>本周还没有任何记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 项目详情模态框 -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">项目详情</h2>
+                <button class="modal-close" onclick="closeModal('projectModal')">×</button>
+            </div>
+            <div class="form-group">
+                <label>项目名称</label>
+                <input type="text" id="projectNameDetail" readonly style="background: var(--bg-light);" />
+            </div>
+            <div class="form-group">
+                <label>开始时间</label>
+                <input type="text" id="projectStartTime" readonly style="background: var(--bg-light);" />
+            </div>
+            <div class="form-group">
+                <label>时长</label>
+                <input type="text" id="projectDuration" readonly style="background: var(--bg-light);" />
+            </div>
+            <div class="form-group">
+                <label>备注</label>
+                <textarea id="projectNotes" placeholder="添加备注..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('projectModal')">关闭</button>
+                <button class="btn btn-primary" onclick="updateProjectNotes()">保存备注</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let records = [];
+        let timerInterval = null;
+        let currentTime = 0;
+        let currentProjectName = null;
+        let isPaused = false;
+        let currentRecordId = null;
+
+        // 初始化
+        function init() {
+            loadData();
+            updateStats();
+            renderTables();
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        // 加载数据
+        function loadData() {
+            const saved = localStorage.getItem('timeTrackerRecords');
+            if (saved) {
+                records = JSON.parse(saved);
+            }
+        }
+
+        // 保存数据
+        function saveData() {
+            localStorage.setItem('timeTrackerRecords', JSON.stringify(records));
+            updateStats();
+            renderTables();
+        }
+
+        // 选择或新建项目
+        function selectProject() {
+            const projectName = document.getElementById('newProjectName').value.trim();
+            if (!projectName) {
+                alert('请输入项目名称');
+                return;
+            }
+            currentProjectName = projectName;
+            currentTime = 0;
+            updateTimerDisplay();
+            document.getElementById('currentProject').textContent = `当前项目: ${projectName}`;
+            document.getElementById('currentProject').style.display = 'block';
+            document.getElementById('newProjectName').value = '';
+            updateStartButton();
+        }
+
+        // 开始计时
+        function startProject() {
+            if (!currentProjectName) {
+                alert('请先选择或新建项目');
+                return;
+            }
+            currentTime = 0;
+            currentRecordId = Date.now().toString();
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('pauseBtn').style.display = 'inline-block';
+            document.getElementById('stopBtn').style.display = 'inline-block';
+            document.getElementById('newProjectName').disabled = true;
+
+            timerInterval = setInterval(() => {
+                currentTime++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        // 暂停计时
+        function pauseProject() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                isPaused = true;
+                document.getElementById('pauseBtn').style.display = 'none';
+                document.getElementById('resumeBtn').style.display = 'inline-block';
+            }
+        }
+
+        // 继续计时
+        function resumeProject() {
+            if (!timerInterval) {
+                isPaused = false;
+                document.getElementById('resumeBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'inline-block';
+                timerInterval = setInterval(() => {
+                    currentTime++;
+                    updateTimerDisplay();
+                }, 1000);
+            }
+        }
+
+        // 结束计时
+        function stopProject() {
+            if (currentTime === 0) {
+                alert('项目时长不能为0');
+                return;
+            }
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
+            const hours = Math.floor(currentTime / 3600);
+            const minutes = Math.floor((currentTime % 3600) / 60);
+            const seconds = currentTime % 60;
+
+            const record = {
+                id: currentRecordId,
+                name: currentProjectName,
+                startTime: new Date().toLocaleString('zh-CN'),
+                duration: { hours, minutes, seconds },
+                durationSeconds: currentTime,
+                date: new Date().toISOString().split('T')[0],
+                notes: ''
+            };
+
+            records.unshift(record);
+            saveData();
+
+            resetTimer();
+            updateStartButton();
+            document.getElementById('newProjectName').disabled = false;
+        }
+
+        // 重置计时器
+        function resetTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            currentTime = 0;
+            currentProjectName = null;
+            isPaused = false;
+            currentRecordId = null;
+            updateTimerDisplay();
+            document.getElementById('currentProject').style.display = 'none';
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            document.getElementById('resumeBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'none';
+        }
+
+        // 更新计时器显示
+        function updateTimerDisplay() {
+            const hours = Math.floor(currentTime / 3600);
+            const minutes = Math.floor((currentTime % 3600) / 60);
+            const seconds = currentTime % 60;
+            document.getElementById('timerDisplay').textContent =
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // 更新开始按钮状态
+        function updateStartButton() {
+            const btn = document.getElementById('startBtn');
+            if (currentProjectName) {
+                btn.textContent = '开始计时';
+                btn.style.display = 'inline-block';
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            document.getElementById('totalProjects').textContent = new Set(records.map(r => r.name)).size;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayRecords = records.filter(r => r.date === today);
+            document.getElementById('todayRecords').textContent = todayRecords.length;
+
+            const totalSeconds = records.reduce((sum, r) => sum + r.durationSeconds, 0);
+            const totalHours = (totalSeconds / 3600).toFixed(1);
+            document.getElementById('totalTime').textContent = `${totalHours}h`;
+
+            const avgSeconds = records.length > 0 ? totalSeconds / records.length : 0;
+            const avgHours = (avgSeconds / 3600).toFixed(1);
+            document.getElementById('avgTime').textContent = `${avgHours}h`;
+        }
+
+        // 格式化时长
+        function formatDuration(duration) {
+            if (duration.hours > 0) {
+                return `${duration.hours}h ${duration.minutes}m`;
+            }
+            return `${duration.minutes}m ${duration.seconds}s`;
+        }
+
+        // 计算占比
+        function calculatePercentage(record, filterRecords) {
+            const totalSeconds = filterRecords.reduce((sum, r) => sum + r.durationSeconds, 0);
+            return ((record.durationSeconds / totalSeconds) * 100).toFixed(1);
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+        }
+
+        // 渲染表格
+        function renderTables() {
+            renderFilteredTable('all', records);
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayData = records.filter(r => r.date === today);
+            renderFilteredTable('today', todayData);
+
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            const weekData = records.filter(r => {
+                const date = new Date(r.date);
+                return date >= weekStart && date <= weekEnd;
+            });
+            renderFilteredTable('week', weekData);
+        }
+
+        function renderFilteredTable(tabName, data) {
+            const tableBody = document.getElementById(`${tabName}Body`);
+            const emptyState = document.getElementById(`empty${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            tableBody.innerHTML = data.map((record, index) => {
+                const percentage = calculatePercentage(record, data);
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${record.name}</strong></td>
+                        <td>${tabName === 'week' ? record.date : record.startTime}</td>
+                        <td>${formatDuration(record.duration)}</td>
+                        <td>
+                            <div class="progress-bar" style="width: ${Math.max(percentage, 10)}%; min-width: 60px;">
+                                ${percentage}%
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" onclick="viewDetails('${record.id}')">👁️</button>
+                                <button class="btn-icon delete" onclick="deleteRecord('${record.id}')">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 查看详情
+        function viewDetails(id) {
+            const record = records.find(r => r.id === id);
+            if (!record) return;
+
+            document.getElementById('projectNameDetail').value = record.name;
+            document.getElementById('projectStartTime').value = record.startTime;
+            document.getElementById('projectDuration').value = formatDuration(record.duration);
+            document.getElementById('projectNotes').value = record.notes || '';
+            currentRecordId = id;
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        // 更新项目备注
+        function updateProjectNotes() {
+            const record = records.find(r => r.id === currentRecordId);
+            if (record) {
+                record.notes = document.getElementById('projectNotes').value;
+                saveData();
+                closeModal('projectModal');
+                alert('备注已保存');
+            }
+        }
+
+        // 删除记录
+        function deleteRecord(id) {
+            if (confirm('确定要删除这条记录吗？')) {
+                records = records.filter(r => r.id !== id);
+                saveData();
+            }
+        }
+
+        // 导出 CSV
+        function exportCSV() {
+            if (records.length === 0) {
+                alert('没有数据可以导出');
+                return;
+            }
+
+            let csv = '序号,项目名称,开始时间,时长,日期,备注\n';
+            records.forEach((record, index) => {
+                csv += `${index + 1},"${record.name}","${record.startTime}","${formatDuration(record.duration)}","${record.date}","${record.notes || ''}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `时间追踪_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        // 导出 JSON
+        function exportJSON() {
+            if (records.length === 0) {
+                alert('没有数据可以导出');
+                return;
+            }
+
+            const json = JSON.stringify(records, null, 2);
+            const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `时间追踪_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // 关闭模态框
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // 点击外部关闭模态框
+        document.getElementById('projectModal').addEventListener('click', (e) => {
+            if (e.target.id === 'projectModal') {
+                closeModal('projectModal');
+            }
+        });
+
+        // 回车选择项目
+        document.getElementById('newProjectName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') selectProject();
+        });
+
+        // 初始化应用
+        init();
+    </script>
 </body>
 </html>
